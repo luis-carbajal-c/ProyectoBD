@@ -140,32 +140,91 @@ Todos los pasos en esta sección deben realizarse sobre la máquina que va a act
 
     <property>
             <name>dfs.replication</name>
-            <value>1</value>
+            <value>2</value>
     </property>
    </configuration>
    ```
-   Actualizar el archivo ~/hadoop/etc/hadoop/core-site.xml a lo siguiente:
+   Actualizar el archivo ~/hadoop/etc/hadoop/mapred-site.xml a lo siguiente:
    ```
-   <?xml version="1.0" encoding="UTF-8"?>
-   <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
-     <configuration>
-       <property>
-         <name>fs.default.name</name>
-         <value>hdfs://node-master:9000</value>
-       </property>
-     </configuration>
+   <configuration>
+    <property>
+            <name>mapreduce.framework.name</name>
+            <value>yarn</value>
+    </property>
+    <property>
+            <name>yarn.app.mapreduce.am.env</name>
+            <value>HADOOP_MAPRED_HOME=$HADOOP_HOME</value>
+    </property>
+    <property>
+            <name>mapreduce.map.env</name>
+            <value>HADOOP_MAPRED_HOME=$HADOOP_HOME</value>
+    </property>
+    <property>
+            <name>mapreduce.reduce.env</name>
+            <value>HADOOP_MAPRED_HOME=$HADOOP_HOME</value>
+    </property>
+   </configuration>
    ```
-   Actualizar el archivo ~/hadoop/etc/hadoop/core-site.xml a lo siguiente:
+   Actualizar el archivo ~/hadoop/etc/hadoop/yarn-site.xml a lo siguiente, considerar la ip privada del nodo master en el campo de yarn.resourcemanager.hostname:
    ```
-   <?xml version="1.0" encoding="UTF-8"?>
-   <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
-     <configuration>
-       <property>
-         <name>fs.default.name</name>
-         <value>hdfs://node-master:9000</value>
-       </property>
-     </configuration>
+   <configuration>
+    <property>
+            <name>yarn.acl.enable</name>
+            <value>0</value>
+    </property>
+
+    <property>
+            <name>yarn.resourcemanager.hostname</name>
+            <value>ip-privada</value>
+    </property>
+
+    <property>
+            <name>yarn.nodemanager.aux-services</name>
+            <value>mapreduce_shuffle</value>
+    </property>
+   </configuration>
    ```
+   Actualizar el archivo ~/hadoop/etc/hadoop/workers a lo siguiente:
+   ```
+   node-master
+   node1
+   ```
+
+7. Copiar los binarios de Hadoop del nodo master al nodo worker con el siguiente comando:
+   ```
+   scp hadoop-*.tar.gz node1:/home/hadoop
+   ```
+   Conectarse al nodo worker desde el master usando ssh para extraer los archivos con los siguientes comandos:
+   ```
+   ssh node1
+   tar -xzf hadoop-3.2.4.tar.gz
+   mv hadoop-3.2.4 hadoop
+   exit
+   ```
+   Copiar los archivos de configuración al nodo worker con el siguiente comando:
+   ```
+   scp ~/hadoop/etc/hadoop/* node1:/home/hadoop/hadoop/etc/hadoop/
+   ```
+
+8. Formatear el clúster HDFS con el siguiente comando:
+   ```
+   hdfs namenode -format
+   ```
+   Iniciar el clúster con el siguiente comando:
+   ```
+   start-dfs.sh
+   ```
+   Puedes comprobar que los procesos se están ejecutando correctamente usando el comando `jps` y revisando los outputs en cada nodo. El nodo master debería mostrar el siguiente output:
+
+   ![img](./images/hadoop_node0.png)
+
+   El nodo worker debería mostrar el siguiente output:
+
+   ![img](./images/hadoop_node1.png)
+
+   También puedes acceder a la interfaz web para visualizar el estado del clúster en la dirección http://IP:9870, donde IP es la ip pública del nodo master.
+
+   ![img](./images/hadoop_node1.png)
 
 ### Instalación de Spark
 
