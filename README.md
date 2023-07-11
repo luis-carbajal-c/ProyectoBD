@@ -26,7 +26,12 @@
    ![img](./images/disk3_vm.png)
 
 7. Crear la máquina virtual. Repetir el mismo proceso desde el paso 2 para la segunda máquina virtual. Al finalizar, la sección de máquinas virtuales debería contener ambas máquinas creadas.
+
    ![img](./images/final_vm.png)
+
+9. En la máquina virtual del nodo master, abrir los puertos 9000, 9870, 8088, 18080 y 8888 que van a ser usados para ejecutar servicios en pasos siguientes.
+
+   ![img](./images/port_vm.png)
 
 ### Montar discos agregados
 
@@ -243,8 +248,64 @@ Todos los pasos en esta sección deben realizarse sobre la máquina que va a act
    ![img](./images/port_8088.png)
 
 ### Instalación de Spark
+Todos los pasos en esta sección deben realizarse sobre la máquina que va a actura como nodo master, a menos que se indique lo contrario.
 
+1. Descargar y descomprimir los binarios de Hadoop con los siguientes comandos:
+   ```
+   cd
+   wget https://dlcdn.apache.org/spark/spark-3.2.4/spark-3.2.4-bin-hadoop3.2.tgz
+   tar -xzf spark-3.2.4.tar.gz
+   mv spark-3.2.4 hadoop
+   ```
 
+2. Agregar en el archivo /home/hadoop/.profile las siguientes líneas:
+   ```
+   PATH=/home/hadoop/spark/bin:/home/hadoop/spark/sbin:$PATH
+   export HADOOP_CONF_DIR=/home/hadoop/hadoop/etc/hadoop
+   export SPARK_HOME=/home/hadoop/spark
+   export LD_LIBRARY_PATH=/home/hadoop/hadoop/lib/native:$LD_LIBRARY_PATH
+   ```
+
+3. Renombrar el archivo template de configuración de Spark:
+   ```
+   mv $SPARK_HOME/conf/spark-defaults.conf.template $SPARK_HOME/conf/spark-defaults.conf
+   ```
+   Editar el archivo agregando las siguientes líneas:
+   ```
+   spark.master    yarn
+   spark.eventLog.enabled  true
+   spark.eventLog.dir hdfs://node-master:9000/spark-logs
+   spark.history.provider            org.apache.spark.deploy.history.FsHistoryProvider
+   spark.history.fs.logDirectory     hdfs://node-master:9000/spark-logs
+   spark.history.fs.update.interval  10s
+   spark.history.ui.port             18080
+   ```
+
+4. Crear el directorio donde se van a guardar los logs en el clúster con el siguiente comando:
+   ```
+   hdfs dfs -mkdir /spark-logs
+   ```
+   Ejecutar el servidor de historiales con el siguiente comando:
+   ```
+   start-history-server.sh
+   ```
+   Puedes comprobar que el proceso se está ejecutando correctamente usando el comando `jps` y revisando el output en el nodo master:
+
+   ![img](./images/spark_history.png)
+
+6. Correr el ejemplo de Spark para calcular el valor de Pi con el siguiente comando:
+   ```
+   spark-submit --deploy-mode client \
+               --class org.apache.spark.examples.SparkPi \
+               $SPARK_HOME/examples/jars/spark-examples_2.11-2.2.0.jar 10
+   ```
+   Si todo funciona correctamente se podrá visualizar el output en la terminal.
+
+   ![img](./images/spark_pi.png)
+
+   También puedes acceder a la interfaz web para visualizar el servidor de historiales en la dirección http://IP:18080, donde IP es la ip pública del nodo master.
+
+   ![img](./images/port_18080.png)
 
 ### Obtención y preprocesamiento de datos
 Los pasos a seguir para obtener los datos junto con los scripts para realizar el preprocesamiento se encuentran detallados en el archivo preprocessing.ipynb.
