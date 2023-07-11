@@ -224,7 +224,23 @@ Todos los pasos en esta sección deben realizarse sobre la máquina que va a act
 
    También puedes acceder a la interfaz web para visualizar el estado del clúster en la dirección http://IP:9870, donde IP es la ip pública del nodo master.
 
-   ![img](./images/hadoop_node1.png)
+   ![img](./images/port_9870.png)
+
+9. Iniciar YARN con el siguiente comando:
+   ```
+   start-yarn.sh
+   ```
+   Puedes comprobar que los procesos se están ejecutando correctamente usando el comando `jps` y revisando los outputs en cada nodo. El nodo master debería mostrar el siguiente output:
+
+   ![img](./images/yarn_node0.png)
+
+   El nodo worker debería mostrar el siguiente output:
+
+   ![img](./images/yarn_node1.png)
+
+   También puedes acceder a la interfaz web para visualizar el resource manager en la dirección http://IP:8088, donde IP es la ip pública del nodo master.
+
+   ![img](./images/port_8088.png)
 
 ### Instalación de Spark
 
