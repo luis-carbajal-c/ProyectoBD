@@ -307,6 +307,19 @@ Todos los pasos en esta sección deben realizarse sobre la máquina que va a act
 
    ![img](./images/port_18080.png)
 
+### Instalación de Jupyter Notebook
+
+1. Ejecutar el siguiente comando para instalar Jupyter Notebook en el nodo master:
+   ```
+   pip install jupyter
+   ```
+
+2. Una vez instalado, puedes ejecutar Jupyter en el directorio actual con el siguiente comando:
+   ```
+   jupyter notebook
+   ```
+   Para acceder a la interfaz debes ingresar en tu navegador a la dirección http://IP:8888, donde IP es la ip pública del nodo master.
+
 ### Obtención y preprocesamiento de datos
 Los pasos a seguir para obtener los datos junto con los scripts para realizar el preprocesamiento se encuentran detallados en el archivo preprocessing.ipynb.
 
